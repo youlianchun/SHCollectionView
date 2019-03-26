@@ -10,6 +10,26 @@
 #import <UIKit/UIKit.h>
 
 
+@interface ImageViewCell:UITableViewCell
+@property (nonatomic, readonly) UIImageView *imageView;
+@end
+@implementation ImageViewCell
+@synthesize imageView = _imageView;
+
+-(UIImageView *)imageView {
+    if (!_imageView) {
+        _imageView = [[UIImageView alloc] initWithFrame:self.bounds];
+        [self.contentView addSubview:_imageView];
+        _imageView.translatesAutoresizingMaskIntoConstraints = NO;
+        [self.contentView addConstraint:[NSLayoutConstraint constraintWithItem:_imageView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self.contentView attribute:NSLayoutAttributeLeft multiplier:1 constant:0]];
+        [self.contentView addConstraint:[NSLayoutConstraint constraintWithItem:_imageView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.contentView attribute:NSLayoutAttributeTop multiplier:1 constant:0]];
+        [self.contentView addConstraint:[NSLayoutConstraint constraintWithItem:_imageView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self.contentView attribute:NSLayoutAttributeRight multiplier:1 constant:0]];
+        [self.contentView addConstraint:[NSLayoutConstraint constraintWithItem:_imageView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.contentView attribute:NSLayoutAttributeBottom multiplier:1 constant:0]];
+    }
+    return _imageView;
+}
+
+@end
 @interface _CollectionBGTableView:UITableView
 @end
 @implementation _CollectionBGTableView
@@ -23,6 +43,8 @@
 @end
 
 static NSString * const kContentOffset = @"contentOffset";
+static NSString * const kBounds = @"contentSize";
+
 @interface CollectionSectionBackground ()<UITableViewDataSource, UITableViewDelegate>
 @end
 @implementation CollectionSectionBackground
@@ -49,12 +71,18 @@ static NSString * const kContentOffset = @"contentOffset";
     collectionView.backgroundView = _tableView;
     [_tableView reloadData];
     [collectionView addObserver:self forKeyPath:kContentOffset options:NSKeyValueObservingOptionNew context:nil];
+    [collectionView addObserver:self forKeyPath:kBounds options:NSKeyValueObservingOptionNew context:nil];
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context
 {
-    CGPoint contentOffset = [change[NSKeyValueChangeNewKey] CGPointValue];
-    [_tableView setContentOffset:contentOffset animated:NO];
+    if ([keyPath isEqualToString:kBounds]) {
+        [_tableView reloadData];
+    }
+    if ([keyPath isEqualToString:kContentOffset]) {
+        CGPoint contentOffset = [change[NSKeyValueChangeNewKey] CGPointValue];
+        [_tableView setContentOffset:contentOffset animated:NO];
+    }
 }
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -76,19 +104,16 @@ static NSString * const kContentOffset = @"contentOffset";
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     static NSString * const identifier = @"contentOffset";
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+    ImageViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
     if (!cell) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identifier];
-        UIImageView *imageView = [[UIImageView alloc] initWithFrame:cell.bounds];
-        [cell.contentView addSubview:imageView];
+        cell = [[ImageViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identifier];
     }
-    UIImageView *imageView = cell.contentView.subviews[0];
-    if (indexPath.section %2 == 0) {
-        cell.backgroundColor = [UIColor colorWithRed:1 green:1 blue:0 alpha:0.2];
-    }else {
-        cell.backgroundColor = [UIColor colorWithRed:1 green:0 blue:1 alpha:0.2];
-    }
-    [_delegate background:self imageView:imageView atSection:indexPath.section];
+//    if (indexPath.section %2 == 0) {
+//        cell.backgroundColor = [UIColor colorWithRed:1 green:1 blue:0 alpha:0.2];
+//    }else {
+//        cell.backgroundColor = [UIColor colorWithRed:1 green:0 blue:1 alpha:0.2];
+//    }
+    [_delegate background:self imageView:cell.imageView atSection:indexPath.section];
     return cell;
 }
 

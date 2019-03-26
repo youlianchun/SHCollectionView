@@ -11,7 +11,7 @@
 #import "CollectionViews.h"
 #import "CollectionSectionBackground.h"
 
-@interface ViewController ()<SHCollectionViewDelegateFlowLayout, SHCollectionViewDataSource>
+@interface ViewController ()<SHCollectionViewDelegateFlowLayout, SHCollectionViewDataSource, CollectionSectionBackgroundDelegate>
 @property (weak, nonatomic) IBOutlet SHCollectionView *collectionView;
 @property (nonatomic, strong) CollectionSectionBackground *background;
 @end
@@ -34,6 +34,7 @@
     [self.collectionView reloadData];
     
     self.background = [CollectionSectionBackground new];
+    self.background.delegate = self;
     [self.background setCollectionView:self.collectionView];
     // Do any additional setup after loading the view, typically from a nib.
 }
@@ -111,4 +112,11 @@
 }
 
 
+-(void)background:(CollectionSectionBackground *)background imageView:(UIImageView *)imageView atSection:(NSUInteger)section {
+    if (section %2 == 0) {
+        imageView.backgroundColor = [UIColor colorWithRed:1 green:1 blue:0 alpha:0.2];
+    }else {
+        imageView.backgroundColor = [UIColor colorWithRed:1 green:0 blue:1 alpha:0.2];
+    }
+}
 @end
