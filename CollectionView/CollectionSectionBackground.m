@@ -79,12 +79,16 @@ static NSString * const kContentOffset = @"contentOffset";
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
     if (!cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identifier];
+        UIImageView *imageView = [[UIImageView alloc] initWithFrame:cell.bounds];
+        [cell.contentView addSubview:imageView];
     }
+    UIImageView *imageView = cell.contentView.subviews[0];
     if (indexPath.section %2 == 0) {
         cell.backgroundColor = [UIColor colorWithRed:1 green:1 blue:0 alpha:0.2];
     }else {
         cell.backgroundColor = [UIColor colorWithRed:1 green:0 blue:1 alpha:0.2];
     }
+    [_delegate background:self imageView:imageView atSection:indexPath.section];
     return cell;
 }
 

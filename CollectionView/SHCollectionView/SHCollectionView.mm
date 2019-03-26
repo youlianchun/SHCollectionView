@@ -164,11 +164,22 @@ typedef std::vector<RegContent*> RegContents;
     }
 }
 
+-(void)setBounds:(CGRect)bounds {
+    if (ABS(CGRectGetWidth(super.bounds) - CGRectGetWidth(bounds)) > 0.01) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            //刷新一个cell，触发HCollectionViewCell reload
+            [self reloadItemsAtIndexPaths:@[[NSIndexPath indexPathForRow:0 inSection:0]]];
+        });
+    }
+    super.bounds = bounds;
+}
+
 -(void)dealloc
 {
     _shMap.clear();
     _regContents.clear();
 }
+
 
 @end
 
@@ -237,6 +248,11 @@ static NSString * const kContentOffset = @"contentOffset";
         [self buildCollectionView];
     }
     return self;
+}
+
+-(void)setBounds:(CGRect)bounds {
+    super.bounds = bounds;
+    _collectionView.frame = bounds;
 }
 
 -(void)buildCollectionView
