@@ -9,13 +9,25 @@
 #import "CollectionSectionBackground.h"
 #import <UIKit/UIKit.h>
 
+
+@interface _CollectionBGTableView:UITableView
+@end
+@implementation _CollectionBGTableView
+-(void)setContentOffset:(CGPoint)contentOffset {
+    if ([self.superview isKindOfClass:[UIScrollView class]]) {
+        UIScrollView *scrollView = (UIScrollView *)self.superview;
+        if (!CGPointEqualToPoint(contentOffset, scrollView.contentOffset)) return;
+    }
+    [super setContentOffset:contentOffset];
+}
+@end
+
 static NSString * const kContentOffset = @"contentOffset";
 @interface CollectionSectionBackground ()<UITableViewDataSource, UITableViewDelegate>
-
 @end
 @implementation CollectionSectionBackground
 {
-    UITableView *_tableView;
+    _CollectionBGTableView *_tableView;
     UICollectionView *_collectionView;
 }
 -(instancetype)init
@@ -23,9 +35,9 @@ static NSString * const kContentOffset = @"contentOffset";
     self = [super init];
     if (self)
     {
-        _tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStyleGrouped];
+        _tableView = [[_CollectionBGTableView alloc] initWithFrame:CGRectZero style:UITableViewStyleGrouped];
         _tableView.userInteractionEnabled = NO;
-//        tableView.scrollEnabled = NO;
+        _tableView.scrollEnabled = NO;
         _tableView.delegate = self;
         _tableView.dataSource = self;
     }
@@ -33,7 +45,7 @@ static NSString * const kContentOffset = @"contentOffset";
 }
 -(void) setCollectionView:(UICollectionView*)collectionView
 {
-    self->_collectionView = collectionView;
+    _collectionView = collectionView;
     collectionView.backgroundView = _tableView;
     [_tableView reloadData];
     [collectionView addObserver:self forKeyPath:kContentOffset options:NSKeyValueObservingOptionNew context:nil];
@@ -42,9 +54,7 @@ static NSString * const kContentOffset = @"contentOffset";
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context
 {
     CGPoint contentOffset = [change[NSKeyValueChangeNewKey] CGPointValue];
-    NSLog(@"%f", contentOffset.y);
     [_tableView setContentOffset:contentOffset animated:NO];
-//    tableView.contentOffset = contentOffset;
 }
 
 -(NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -94,12 +104,4 @@ static NSString * const kContentOffset = @"contentOffset";
 }
 
 @end
-@implementation UICollectionView (bg)
-//- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
-//{
-//    if (otherGestureRecognizer.view == self.backgroundView) {
-//        return YES;
-//    }
-//    return NO;
-//}
-@end
+

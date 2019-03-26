@@ -169,6 +169,7 @@ typedef std::vector<RegContent*> RegContents;
     _shMap.clear();
     _regContents.clear();
 }
+
 @end
 
 #pragma mark -
